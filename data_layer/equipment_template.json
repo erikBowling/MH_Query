@@ -1,0 +1,30 @@
+{
+  "equipment": {
+
+      "name": "",
+      "rarity": 0,
+      "type": "",
+      "defense": 0,
+      "jewelSlots": [0,0,0],
+
+      "raw_base": 0,
+      "sharpness": 0,
+      "affinity": 0,
+      "element": {
+          "type": "",
+          "value": 0
+      },
+
+      "elementalDefense": {
+          "fire": 0,
+          "water": 0,
+          "lightning": 0,
+          "ice": 0,
+          "dragon": 0
+      },
+      "skills": {
+        "Quick_Sheath": 1,
+        "Partbreaker": 2
+      }
+  }
+}
