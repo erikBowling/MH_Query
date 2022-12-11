@@ -1,34 +1,36 @@
 import requests
+import json
 from bs4 import BeautifulSoup
 
+
 def main():
-    
     rank_tables_url = "https://monsterhunterrise.wiki.fextralife.com/Armor+Set+Comparison+Table"
     rank_tables_res = requests.get(rank_tables_url)
     rank_tables_page = BeautifulSoup(rank_tables_res.text, "html.parser")
 
     tables = rank_tables_page.find_all("tbody")
-
+    ranks = ["Master Rank", "High Rank", "Low Rank"]
     armor = []
-    for table in tables:
+    for rank_ind, table in enumerate(tables):
         rows = table.find_all("tr")
         for row in rows:
             first_cell = row.find("td")
             href = first_cell.find("a").get("href")
-            
+
             set_url = f"https://monsterhunterrise.wiki.fextralife.com{href}"
             set_res = requests.get(set_url)
             set_page = BeautifulSoup(set_res.text, "html.parser")
 
             set_tables = set_page.find_all("tbody")
 
-            for row in set_tables[1].find_all("tr"):
+            for second_row in set_tables[1].find_all("tr"):
                 piece = {
                     "name": "",
                     "rarity": "",
                     "defense": "",
+                    "rank": ranks[rank_ind],
                     "slots": [],
-                    "resistance":{
+                    "resistance": {
                         "fire": 0,
                         "water": 0,
                         "thunder": 0,
@@ -40,11 +42,11 @@ def main():
                     "crafting_list": {}
                 }
 
-                first_cell = row.find("td")
+                first_cell = second_row.find("td")
                 if first_cell.find("a") is None:
                     continue
                 href = first_cell.find("a").get("href")
-                
+
                 piece_url = f"https://monsterhunterrise.wiki.fextralife.com/{href}"
                 piece_res = requests.get(piece_url)
                 piece_page = BeautifulSoup(piece_res.text, "html.parser")
@@ -78,7 +80,7 @@ def main():
                     s = ""
                     for child in r.children:
                         s += child.text
-                    
+
                     s = s.strip()
 
                     if i == 0:
@@ -92,13 +94,17 @@ def main():
                     elif i == 4:
                         img_tags = r.find_all("img")
                         for img in img_tags:
-                            if img.get("src") == "/file/Monster-Hunter-Rise/decoration_level_4_icon_monster_hunter_rise_wiki_guide_24px.png":
+                            if img.get(
+                                    "src") == "/file/Monster-Hunter-Rise/decoration_level_4_icon_monster_hunter_rise_wiki_guide_24px.png":
                                 piece['slots'].append(4)
-                            elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_3_icon_monster_hunter_rise_wiki_guide_24px.png":
+                            elif img.get(
+                                    "src") == "/file/Monster-Hunter-Rise/gem_level_3_icon_monster_hunter_rise_wiki_guide_24px.png":
                                 piece['slots'].append(3)
-                            elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_2_icon_monster_hunter_rise_wiki_guide_24px.png":
+                            elif img.get(
+                                    "src") == "/file/Monster-Hunter-Rise/gem_level_2_icon_monster_hunter_rise_wiki_guide_24px.png":
                                 piece['slots'].append(2)
-                            elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_1_icon_monster_hunter_rise_wiki_guide_24px.png":
+                            elif img.get(
+                                    "src") == "/file/Monster-Hunter-Rise/gem_level_1_icon_monster_hunter_rise_wiki_guide_24px.png":
                                 piece['slots'].append(1)
 
                     elif i == 5:
@@ -123,25 +129,29 @@ def main():
                                 if char.isdigit():
                                     piece['skills'][f'{s[0:j]}'.split('\xa0x')[0]] = s[j]
                                     break
-                            s = s[j+1:]
+                            s = s[j + 1:]
                 armor.append(piece)
 
-    with open('armor.txt', 'w') as file:
+    with open('../raw_data/armor.json', 'w') as file:
+        file.write("{\n\t\"armor\": [\n")
         for arm in armor:
-            file.write(f"{arm}\n")    
+            file.write("\t\t" + json.dumps(arm) + ',\n')
+
+        file.write("\t]\n}")
+
 
 def test():
-    test_url = "https://monsterhunterrise.wiki.fextralife.com/Royal+Artillery+Corps" 
+    test_url = "https://monsterhunterrise.wiki.fextralife.com/Royal+Artillery+Corps"
     test_res = requests.get(test_url)
     test_page = BeautifulSoup(test_res.text, "html.parser")
-    
-    set_tables = test_page.find_all("tbody")
 
+    set_tables = test_page.find_all("tbody")
+    armor = []
     for row in set_tables[1].find_all("tr"):
 
         first_cell = row.find("td")
         href = first_cell.find("a").get("href")
-        
+
         piece_url = f"https://monsterhunterrise.wiki.fextralife.com/{href}"
         piece_res = requests.get(piece_url)
         piece_page = BeautifulSoup(piece_res.text, "html.parser")
@@ -154,7 +164,7 @@ def test():
             "rarity": "",
             "defense": "",
             "slots": [],
-            "resistance":{
+            "resistance": {
                 "fire": 0,
                 "water": 0,
                 "thunder": 0,
@@ -185,14 +195,13 @@ def test():
             else:
                 piece['crafting_list']['Zenny'] = li.text
 
-
         # Armor Table in top left
         piece_table = piece_page.find('tbody')
         for i, r in enumerate(piece_table.find_all("tr")):
             s = ""
             for child in r.children:
                 s += child.text
-            
+
             s = s.strip()
 
             if i == 0:
@@ -206,13 +215,17 @@ def test():
             elif i == 4:
                 img_tags = r.find_all("img")
                 for img in img_tags:
-                    if img.get("src") == "/file/Monster-Hunter-Rise/decoration_level_4_icon_monster_hunter_rise_wiki_guide_24px.png":
+                    if img.get(
+                            "src") == "/file/Monster-Hunter-Rise/decoration_level_4_icon_monster_hunter_rise_wiki_guide_24px.png":
                         piece['slots'].append(4)
-                    elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_3_icon_monster_hunter_rise_wiki_guide_24px.png":
+                    elif img.get(
+                            "src") == "/file/Monster-Hunter-Rise/gem_level_3_icon_monster_hunter_rise_wiki_guide_24px.png":
                         piece['slots'].append(3)
-                    elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_2_icon_monster_hunter_rise_wiki_guide_24px.png":
+                    elif img.get(
+                            "src") == "/file/Monster-Hunter-Rise/gem_level_2_icon_monster_hunter_rise_wiki_guide_24px.png":
                         piece['slots'].append(2)
-                    elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_1_icon_monster_hunter_rise_wiki_guide_24px.png":
+                    elif img.get(
+                            "src") == "/file/Monster-Hunter-Rise/gem_level_1_icon_monster_hunter_rise_wiki_guide_24px.png":
                         piece['slots'].append(1)
 
             elif i == 5:
@@ -237,9 +250,16 @@ def test():
                         if char.isdigit():
                             piece['skills'][f'{s[0:j]}'.split('\xa0x', 1)[0]] = s[j]
                             break
-                    s = s[j+1:]
-
+                    s = s[j + 1:]
+        armor.append(piece)
         print(piece)
+
+    with open('../raw_data/armor_test.json', 'w') as file:
+        file.write("{\n\t\"armor\": [\n")
+        for arm in armor:
+            file.write("\t\t" + json.dumps(arm) + ',\n')
+
+        file.write("\t]\n}")
 
 
 if __name__ == "__main__":
