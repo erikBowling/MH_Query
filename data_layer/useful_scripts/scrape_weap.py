@@ -22,7 +22,7 @@ def main():
         table = doc.find("tbody")
         rows = table.find_all("tr")
         items = []
-
+        print(local_files[i])
         if i < 6:
             items = standard_weapon_scrape(rows)
         elif i == 6:
@@ -39,11 +39,14 @@ def main():
             items = gun_scrape(rows)
 
         with open(f"../raw_data/{local_files[i]}.json", "w") as file:
-            file.write("{\n\t\"items\": [\n")
-            for wep in items:
-                file.write("\t\t" + json.dumps(wep) + ',\n')
+            file.write("[\n")
+            for j, wep in enumerate(items):
+                if j != len(items) - 1:
+                    file.write("\t" + json.dumps(wep) + ',\n')
+                else:
+                    file.write("\t" + json.dumps(wep) + '\n')
 
-            file.write("\t]\n}")
+            file.write("]")
 
 
 def standard_weapon_scrape(rows: bs4.element.ResultSet):
@@ -51,11 +54,13 @@ def standard_weapon_scrape(rows: bs4.element.ResultSet):
     for row in rows:
         item = {
             "name": "",
+            "rank": "",
             "raw": 0,
-            "element": [],
             "affinity": 0,
             "defense": 0,
             "rarity": 0,
+            "slots": [],
+            "element": [],
             "rampage_skills": [],
             "crafting_list": {}
         }
@@ -63,7 +68,7 @@ def standard_weapon_scrape(rows: bs4.element.ResultSet):
         for i, cell in enumerate(cells):
 
             if i == 0:
-                item["name"] = cell.find("a").text
+                item["name"], item["slots"] = get_name_and_slots(cell)
             elif i == 1:
                 item['raw'] = get_raw(cell)
             elif i == 2:
@@ -73,7 +78,7 @@ def standard_weapon_scrape(rows: bs4.element.ResultSet):
             elif i == 4:
                 item['defense'] = get_defense(cell)
             elif i == 5:
-                item['rarity'] = get_rarity(cell)
+                item['rarity'], item["rank"] = get_rarity_and_rank(cell)
             elif i == 6:
                 item['rampage_skills'] = get_rampage_skills(cell)
             elif i == 7:
@@ -89,12 +94,14 @@ def hunting_horn_scrape(rows: bs4.element.ResultSet):
     for row in rows:
         item = {
             "name": "",
+            "rank": "",
             "raw": 0,
-            "element": [],
             "affinity": 0,
             "defense": 0,
-            "melodies": [],
             "rarity": 0,
+            "slots": [],
+            "element": [],
+            "melodies": [],
             "rampage_skills": [],
             "crafting_list": {}
         }
@@ -102,7 +109,7 @@ def hunting_horn_scrape(rows: bs4.element.ResultSet):
         for i, cell in enumerate(cells):
 
             if i == 0:
-                item["name"] = cell.find("a").text
+                item["name"], item["slots"] = get_name_and_slots(cell)
             elif i == 1:
                 item['raw'] = get_raw(cell)
             elif i == 2:
@@ -116,7 +123,7 @@ def hunting_horn_scrape(rows: bs4.element.ResultSet):
                     if type(child) == bs4.element.NavigableString:
                         item['melodies'].append(child.text.replace('\xa0', ''))
             elif i == 6:
-                item['rarity'] = get_rarity(cell)
+                item['rarity'], item["rank"] = get_rarity_and_rank(cell)
             elif i == 7:
                 item['rampage_skills'] = get_rampage_skills(cell)
             elif i == 8:
@@ -132,15 +139,17 @@ def gunlance_scrape(rows: bs4.element.ResultSet):
     for row in rows:
         item = {
             "name": "",
+            "rank": "",
             "raw": 0,
-            "element": [],
             "affinity": 0,
             "defense": 0,
+            "rarity": 0,
+            "slots": [],
+            "element": [],
             "shelling": {
                 "type": "",
                 "level": 0
             },
-            "rarity": 0,
             "rampage_skills": [],
             "crafting_list": {}
         }
@@ -148,7 +157,7 @@ def gunlance_scrape(rows: bs4.element.ResultSet):
         for i, cell in enumerate(cells):
 
             if i == 0:
-                item["name"] = cell.find("a").text
+                item["name"], item["slots"] = get_name_and_slots(cell)
             elif i == 1:
                 item['raw'] = get_raw(cell)
             elif i == 2:
@@ -165,7 +174,7 @@ def gunlance_scrape(rows: bs4.element.ResultSet):
                 except ValueError:
                     item['shelling']['level'] = None
             elif i == 7:
-                item['rarity'] = get_rarity(cell)
+                item['rarity'], item["rank"] = get_rarity_and_rank(cell)
             elif i == 8:
                 item['rampage_skills'] = get_rampage_skills(cell)
             elif i == 9:
@@ -181,12 +190,14 @@ def switch_or_charge_scrape(rows: bs4.element.ResultSet):
     for row in rows:
         item = {
             "name": "",
+            "rank": "",
             "raw": 0,
-            "element": [],
             "affinity": 0,
             "defense": 0,
-            "phial": "",
             "rarity": 0,
+            "slots": [],
+            "phial": "",
+            "element": [],
             "rampage_skills": [],
             "crafting_list": {}
         }
@@ -194,7 +205,7 @@ def switch_or_charge_scrape(rows: bs4.element.ResultSet):
         for i, cell in enumerate(cells):
 
             if i == 0:
-                item["name"] = cell.find("a").text
+                item["name"], item["slots"] = get_name_and_slots(cell)
             elif i == 1:
                 item['raw'] = get_raw(cell)
             elif i == 2:
@@ -211,7 +222,7 @@ def switch_or_charge_scrape(rows: bs4.element.ResultSet):
             elif i == 5:
                 item['defense'] = get_defense(cell)
             elif i == 6:
-                item['rarity'] = get_rarity(cell)
+                item['rarity'], item["rank"] = get_rarity_and_rank(cell)
             elif i == 7:
                 item['rampage_skills'] = get_rampage_skills(cell)
             elif i == 8:
@@ -227,12 +238,14 @@ def insect_glaive_scrape(rows: bs4.element.ResultSet):
     for row in rows:
         item = {
             "name": "",
+            "rank": "",
             "raw": 0,
-            "element": [],
             "affinity": 0,
             "defense": 0,
-            "kinsect_level": 0,
             "rarity": 0,
+            "slots": [],
+            "kinsect_level": 0,
+            "element": [],
             "rampage_skills": [],
             "crafting_list": {}
         }
@@ -240,7 +253,7 @@ def insect_glaive_scrape(rows: bs4.element.ResultSet):
         for i, cell in enumerate(cells):
 
             if i == 0:
-                item["name"] = cell.find("a").text
+                item["name"], item["slots"] = get_name_and_slots(cell)
             elif i == 1:
                 item['raw'] = get_raw(cell)
             elif i == 2:
@@ -252,7 +265,7 @@ def insect_glaive_scrape(rows: bs4.element.ResultSet):
             elif i == 5:
                 item['defense'] = get_defense(cell)
             elif i == 6:
-                item['rarity'] = get_rarity(cell)
+                item['rarity'], item["rank"] = get_rarity_and_rank(cell)
             elif i == 7:
                 item['rampage_skills'] = get_rampage_skills(cell)
             elif i == 8:
@@ -268,9 +281,13 @@ def bow_scrape(rows: bs4.element.ResultSet):
     for row in rows:
         item = {
             "name": "",
+            "rank": "",
             "raw": 0,
-            "element": [],
             "affinity": 0,
+            "defense": 0,
+            "rarity": 0,
+            "slots": [],
+            "element": [],
             "arcshot": "",
             "charge_shots": {
                 1: "",
@@ -278,17 +295,15 @@ def bow_scrape(rows: bs4.element.ResultSet):
                 3: "",
                 4: ""
             },
-            "defense": 0,
-            "rarity": 0,
-            "rampage_skills": [],
             "coatings": [],
+            "rampage_skills": [],
             "crafting_list": {}
         }
         cells = row.find_all("td")
         for i, cell in enumerate(cells):
 
             if i == 0:
-                item["name"] = cell.find("a").text
+                item["name"], item["slots"] = get_name_and_slots(cell)
             elif i == 1:
                 item['raw'] = get_raw(cell)
             elif i == 2:
@@ -300,13 +315,13 @@ def bow_scrape(rows: bs4.element.ResultSet):
             elif 5 <= i <= 8:
                 val = cell.text.replace('\u00a0', '')
                 if val == '--':
-                    item["charge_shots"][i-4] = None
+                    item["charge_shots"][i - 4] = None
                 else:
-                    item["charge_shots"][i-4] = val
+                    item["charge_shots"][i - 4] = val
             elif i == 9:
                 item['defense'] = get_defense(cell)
             elif i == 10:
-                item['rarity'] = get_rarity(cell)
+                item['rarity'], item["rank"] = get_rarity_and_rank(cell)
             elif i == 11:
                 item['rampage_skills'] = get_rampage_skills(cell)
             elif i == 12:
@@ -326,15 +341,17 @@ def gun_scrape(rows: bs4.element.ResultSet):
     for row in rows:
         item = {
             "name": "",
+            "rank": "",
             "raw": 0,
             "affinity": 0,
+            "defense": 0,
+            "rarity": 0,
+            "slots": [],
             "deviation": "",
             "recoil": "",
             "reload": "",
             "cluster_bomb_type": "",
             "special_ammo": "",
-            "defense": 0,
-            "rarity": 0,
             "rampage_skills": [],
             "crafting_list": {}
         }
@@ -342,7 +359,7 @@ def gun_scrape(rows: bs4.element.ResultSet):
         for i, cell in enumerate(cells):
 
             if i == 0:
-                item["name"] = cell.find("a").text
+                item["name"], item["slots"] = get_name_and_slots(cell)
             elif i == 1:
                 item['raw'] = get_raw(cell)
             elif i == 2:
@@ -360,7 +377,7 @@ def gun_scrape(rows: bs4.element.ResultSet):
             elif i == 8:
                 item['defense'] = get_defense(cell)
             elif i == 9:
-                item['rarity'] = get_rarity(cell)
+                item['rarity'], item["rank"] = get_rarity_and_rank(cell)
             elif i == 10:
                 item['rampage_skills'] = get_rampage_skills(cell)
             elif i == 11:
@@ -371,7 +388,33 @@ def gun_scrape(rows: bs4.element.ResultSet):
     return items
 
 
-def get_raw(cell: bs4.element.Tag):
+def get_name_and_slots(cell: bs4.element.Tag) -> tuple[str, list]:
+    gems = []
+    gem_slot_tags = cell.find_all("img")
+    for img in gem_slot_tags:
+        if img.get(
+                "src") == "/file/Monster-Hunter-Rise/decoration_level_4_icon_monster_hunter_rise_wiki_guide_24px.png":
+            gems.append(4)
+        elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_3_icon_monster_hunter_rise_wiki_guide_24px.png":
+            gems.append(3)
+        elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_2_icon_monster_hunter_rise_wiki_guide_24px.png":
+            gems.append(2)
+        elif img.get("src") == "/file/Monster-Hunter-Rise/gem_level_1_icon_monster_hunter_rise_wiki_guide_24px.png":
+            gems.append(1)
+        elif img.get(
+                "src") == "/file/Monster-Hunter-Rise/gem_level_3_rampage_icon_monster_hunter_rise_wiki_guide_24px.png":
+            gems.append(13)
+        elif img.get(
+                "src") == "/file/Monster-Hunter-Rise/gem_level_2_rampage_icon_monster_hunter_rise_wiki_guide_24px.png":
+            gems.append(12)
+        elif img.get(
+                "src") == "/file/Monster-Hunter-Rise/gem_level_1_rampage_icon_monster_hunter_rise_wiki_guide_24px.png":
+            gems.append(11)
+
+    return cell.find("a").text, gems
+
+
+def get_raw(cell: bs4.element.Tag) -> int | None:
     try:
         return int(cell.string)
     except TypeError:
@@ -380,34 +423,41 @@ def get_raw(cell: bs4.element.Tag):
         return None
 
 
-def get_element(cell: bs4.element.Tag):
+def get_element(cell: bs4.element.Tag) -> list | None:
     if cell.find('a') is not None:
         try:
             return [cell.find('a').text.replace('\u00a0', ''),
                     int(''.join(char for char in cell.text if char.isdigit()))]
         except ValueError:
-            return None
+            return []
     else:
         return None
 
 
-def get_defense(cell: bs4.element.Tag):
+def get_defense(cell: bs4.element.Tag) -> int:
     try:
         return int(cell.string)
     except ValueError:
         return 0
 
 
-def get_rarity(cell: bs4.element.Tag):
+def get_rarity_and_rank(cell: bs4.element.Tag) -> tuple[int | None, str]:
     try:
-        return int(cell.string[-2:])
+        rarity = int(cell.string[-2:])
+        if rarity >= 8:
+            return rarity, "Master"
+        elif 4 <= rarity <= 7:
+            return rarity, "High"
+        else:
+            return rarity, "Low"
+
     except ValueError:
-        return None
+        return None, "Unknown"
     except TypeError:
-        return None
+        return None, "Unknown"
 
 
-def get_rampage_skills(cell: bs4.element.Tag):
+def get_rampage_skills(cell: bs4.element.Tag) -> list:
     ul = cell.find_all("li")
     rampage_skills = []
     for li in ul:
@@ -419,7 +469,7 @@ def get_rampage_skills(cell: bs4.element.Tag):
     return rampage_skills
 
 
-def get_crafting_list(cell: bs4.element.Tag):
+def get_crafting_list(cell: bs4.element.Tag) -> dict:
     ul = cell.find_all("li")
     item = {}
     for j, li in enumerate(ul):
@@ -439,7 +489,7 @@ def get_crafting_list(cell: bs4.element.Tag):
 
             # Monster Points
             else:
-                item["Points"] = li.string.replace('\u00a0', '')
+                item["Points"] = li.string.replace('\u00a0', '').replace("Points.", "").strip()
 
     return item
 

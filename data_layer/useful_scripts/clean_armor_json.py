@@ -3,10 +3,10 @@ import json
 
 def main():
     a_keys = ['resistance', 'skills', 'crafting_list']
-    with open('../raw_data/armor.json', 'r') as infile, open('../raw_data/armor_test.json', 'w') as outfile:
-        total_json = json.loads(infile.read())
-        outfile.write("{\n\t\"armor\": [\n")
-        for i, arm in enumerate(total_json['armor']):
+    with open('../raw_data/test_armor.json', 'r') as infile, open('../raw_data/armor.json', 'w') as outfile:
+        total_json = json.load(infile)
+        outfile.write("[\n")
+        for i, arm in enumerate(total_json):
             try:
                 arm['rarity'] = int(arm['rarity'])
                 arm['defense'] = int(arm['defense'])
@@ -21,12 +21,12 @@ def main():
                 old_skills = [s for s in arm['skills']]
                 for skill in old_skills:
                     if skill[-1] == "x":
-                        arm['skills'][skill[:-2]] = arm['skills'].pop(skill)
+                        arm['skills'][skill[:-1].strip()] = arm['skills'].pop(skill)
             except KeyError:
                 print(f"Key error on line {i}: {arm}")
 
-            outfile.write("\t" * 2 + json.dumps(arm) + ",\n")
-        outfile.write("]\n}")
+            outfile.write("\t" + json.dumps(arm) + ",\n")
+        outfile.write("]")
 
 
 if __name__ == "__main__":

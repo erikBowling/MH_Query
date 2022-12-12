@@ -9,7 +9,7 @@ def main():
     rank_tables_page = BeautifulSoup(rank_tables_res.text, "html.parser")
 
     tables = rank_tables_page.find_all("tbody")
-    ranks = ["Master Rank", "High Rank", "Low Rank"]
+    ranks = ["Master", "High", "Low"]
     armor = []
     for rank_ind, table in enumerate(tables):
         rows = table.find_all("tr")
@@ -132,12 +132,12 @@ def main():
                             s = s[j + 1:]
                 armor.append(piece)
 
-    with open('../raw_data/armor.json', 'w') as file:
-        file.write("{\n\t\"armor\": [\n")
+    with open('../raw_data/test_armor.json', 'w') as file:
+        file.write("[\n")
         for arm in armor:
             file.write("\t\t" + json.dumps(arm) + ',\n')
 
-        file.write("\t]\n}")
+        file.write("]")
 
 
 def test():
