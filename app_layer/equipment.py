@@ -22,8 +22,8 @@ class Equipment(object):
         self.__rank: str = equip_dict.get("rank")
         self.__rarity: int = equip_dict.get("rarity")
         self.__defense: int = equip_dict.get("defense")
-        self.__jewel_slots: list[int] = equip_dict.get("slots")
-        self.__crafting_mats: dict = equip_dict.get("crafting_materials")
+        self.__slots: list[int] = equip_dict.get("slots")
+        self.__crafting_mats: dict = equip_dict.get("crafting_list")
 
     @property
     def name(self) -> str:
@@ -42,5 +42,24 @@ class Equipment(object):
         return self.__defense
 
     @property
-    def jewel_slots(self) -> list[int]:
+    def rarity(self) -> int:
+        return self.__rarity
+
+    @property
+    def slots(self) -> list[int]:
         return self.__slots
+    
+    @property
+    def crafting_mats(self) -> dict:
+        return self.__crafting_mats
+
+
+    def get_crafting_list(self) -> list[tuple[str, int]]:
+        if self.__crafting_mats is None:
+            return None
+
+        result: list[tuple[str, int]] = []
+        for key in self.__crafting_mats:
+            result.append((key, self.__crafting_mats[key]))
+
+        return result
