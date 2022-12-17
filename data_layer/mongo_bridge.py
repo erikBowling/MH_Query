@@ -1,27 +1,31 @@
 import pymongo
 from multipledispatch import dispatch
 from app_layer.armor import Armor
+from pymongo import errors
 
 
 class MongoBridge:
 
     @dispatch()
     def __init__(self) -> None:
-        self.__client = pymongo.MongoClient("mongodb://localhost:27017/")
+        self.__client = pymongo.MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=4000)
         self.__collection = self.__client['Equipment']["Armor"]
 
     @dispatch(str, str, str)
     def __init__(self, uri: str, db: str, col: str) -> None:
-        self.__client = pymongo.MongoClient(uri)
+        self.__client = pymongo.MongoClient(uri, serverSelectionTimeoutMS=4000)
         self.__collection = self.__client[db][col]
 
     def get_all_items(self) -> list[dict]:
-        result: list = []
-        items = self.__collection.find()
-        for item in items:
-            result.append(item)
+        try:
+            result: list = []
+            items = self.__collection.find()
+            for item in items:
+                result.append(item)
 
-        return result
+            return result
+        except pymongo.errors.ServerSelectionTimeoutError:
+            raise
 
     def get_all_armor(self) -> list[Armor]:
         result: list[Armor] = []

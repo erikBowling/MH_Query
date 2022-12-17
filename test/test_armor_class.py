@@ -54,6 +54,8 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(self.empty_arm.skills, {})
 
+    def test_skills_list(self):
+        self.assertEqual([("Quick_Sheath",  1), ("Partbreaker", 2)], self.arm.get_skills_list())
 
 
 if __name__ == '__main__':

@@ -29,3 +29,11 @@ class Armor(Equipment):
     @property
     def skills(self) -> dict:
         return self.__skills
+
+    def get_skills_list(self) -> list[tuple[str, int]]:
+        skills_list: list[tuple[str, int]] = []
+        for key in self.__skills:
+            skills_list.append((key, self.__skills[key]))
+
+        return skills_list
+
