@@ -6,7 +6,6 @@ from data_layer.mongo_bridge import MongoBridge
 
 app = Flask(__name__)
 
-
 @app.route("/", methods=["GET", "POST"])
 def home():
     mon_bridge: MongoBridge = MongoBridge()
@@ -24,7 +23,6 @@ def home():
             content = "Server not found"
 
     return render_template("index.html", skills=skills, content=content, prev_search=search)
-
 
 if __name__ == "__main__":
     app.run()
